@@ -18,6 +18,7 @@ int main(int argc, char **argv)
     if (argc != 1)
         setOptions(argc, argv);
 
+    initialize_clients();
     if (!initialize_network(port)) {
         fprintf(stderr, "Can't initialize network subsystem. Exit.\n");
         exit(EXIT_FAILURE);
@@ -26,15 +27,26 @@ int main(int argc, char **argv)
     int end_loop = 0; /* flag to end of loop */
     while( !end_loop )
     {
+        Client *client = NULL;
         int fd = -1;
         int event = get_next_event(&fd);
         switch(event) {
         case ACCEPT:
             printf("try to accept new client!\n");
-            switch( accept_client() )
+	        fd = -1;
+            switch( accept_client(&fd) )
             {
             case ACCEPTED:
                 printf("New connection is accepted!\n");
+                if( !(client = add_new_client( fd )) )
+                {
+                    fprintf(stderr, "No more clients could be processed\n");
+                    close_connection( fd );
+                    continue;
+                }
+                client->ntwk_read = epoll_read_handler;
+                client->ntwk_write = epoll_write_handler;
+                setup_smtp_connection( client->handlers );
                 /* need send hello */
                 break;
             case ACCEPT_AGAIN:
@@ -42,6 +54,8 @@ int main(int argc, char **argv)
                 break;
             case ERROR:
                 fprintf(stderr, "Some error was occured while accepting connection\n");
+                if (fd != -1)
+                    close_connection(fd);
                 break;
             default:
                 printf("Unknown accept event. Ignore it\n");
@@ -56,7 +70,7 @@ int main(int argc, char **argv)
         case ERROR:
             perror("Error");
             printf("Close fd=%d\n", fd);
-            close(fd);
+            close_connection(fd);
             break;
         default:
             fprintf(stderr, "Got unknown event. Ignore it\n");

@@ -104,7 +104,7 @@ int get_next_event(int *fd)
     }
 }
 
-int accept_client()
+int accept_client(int *fd)
 {
     struct sockaddr addr_in;
     socklen_t len = sizeof(addr_in);
@@ -133,6 +133,12 @@ int accept_client()
         return ACCEPT_ERROR;
     }
 
+    *fd = infd;
+
     return ACCEPTED;
 }
 
+void close_connection( int fd )
+{
+    close(fd);
+}

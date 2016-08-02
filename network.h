@@ -16,5 +16,9 @@ enum ACCEPT_EVENTS {
 };
 
 int initialize_network(int port);
+int get_next_event(int *fd);
+int accpet_client(int *fd);
+void close_connection(int fd);
+
 
 #endif /* _NETWORK_H_ */
