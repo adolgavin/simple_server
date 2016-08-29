@@ -5,7 +5,8 @@
 
 typedef struct {
     int phase;
-};
+    int fd; /* file descriptor for temporary mail */
+} SMTP_CTX;
 
 void setup_smtp_connection( Handlers *handlers );
 

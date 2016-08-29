@@ -4,7 +4,7 @@
 #include "network.h"
 #include "client.h"
 
-static int port = 23; /* default port for smtp */
+static int port = 25; /* default port for smtp */
 static char *dir = "./"; /* default dir for saving emails */
 
 
@@ -46,7 +46,7 @@ int main(int argc, char **argv)
                 }
                 client->ntwk_read = epoll_read_handler;
                 client->ntwk_write = epoll_write_handler;
-                setup_smtp_connection( client->handlers );
+                setup_smtp_connection( &client->handlers );
                 /* need send hello */
                 break;
             case ACCEPT_AGAIN:
@@ -63,15 +63,20 @@ int main(int argc, char **argv)
             break;
         case READ:
             break;
+
         case WRITE:
             break;
+
         case CLOSE:
+            close_connection(fd);
             break;
+
         case ERROR:
             perror("Error");
             printf("Close fd=%d\n", fd);
             close_connection(fd);
             break;
+
         default:
             fprintf(stderr, "Got unknown event. Ignore it\n");
             break;

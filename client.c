@@ -42,5 +42,7 @@ Client* get_client_by_fd( int fd )
 
 void destroy_client(Client *c)
 {
+    if( c->ctx && c->handlers.ctx_free )
+        c->handlers.ctx_free( c->ctx );
     initialize_client(c);
 }

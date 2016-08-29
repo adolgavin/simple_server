@@ -4,16 +4,16 @@
 typedef struct {
     void (*read_handler)();
     void (*write_handler)();
+    void (*ctx_free)();
 } Handlers;
 
 typedef struct {
-    int fd;
+    int fd; /* file descriptor network socket */
     char buffer[10240];
     void (*ntwk_read)();
     void (*ntwk_write)();
-    union *ctx = {
-    };
-    Handlers *handlers;
+    Handlers handlers;
+    void *ctx;
 } Client;
 
 void initialize_clients();
